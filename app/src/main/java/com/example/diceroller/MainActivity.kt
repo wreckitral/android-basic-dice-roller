@@ -1,9 +1,11 @@
 package com.example.diceroller
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,11 +22,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import com.example.diceroller.ui.theme.DiceRollerTheme
 
 class MainActivity : ComponentActivity() {
@@ -36,25 +42,39 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    DiceRollerApp()
+                    DiceRollerApp { url ->
+                        openUrl(url)
+                    }
                 }
             }
         }
+    }
+
+    private fun openUrl(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = android.net.Uri.parse(url)
+        }
+        startActivity(intent)
     }
 }
 
 @Preview
 @Composable
-fun DiceRollerApp() {
-    DiceWithButtonAndImage(modifier = Modifier
-        .fillMaxSize()
-        .wrapContentSize(Alignment.Center)
+fun DiceRollerApp(onNameClick: (String) -> Unit) {
+    DiceWithButtonAndImage(
+        modifier = Modifier
+            .fillMaxSize()
+            .wrapContentSize(Alignment.Center),
+        onNameClick = onNameClick
     )
 }
 
 @Composable
-fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
-    var result by remember { mutableStateOf( 1) }
+fun DiceWithButtonAndImage(
+    modifier: Modifier = Modifier,
+    onNameClick: (String) -> Unit
+) {
+    var result by remember { mutableStateOf(1) }
     val imageResource = when(result) {
         1 -> R.drawable.dice_1
         2 -> R.drawable.dice_2
@@ -63,8 +83,27 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
         5 -> R.drawable.dice_5
         else -> R.drawable.dice_6
     }
+
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Defhanaya Sofhiea", fontSize = 20.sp)
+        val annotatedString = buildAnnotatedString {
+            append("Defhanaya Sofhiea")
+            addStyle(
+                style = androidx.compose.ui.text.SpanStyle(
+                    color = Color.Blue,
+                    textDecoration = TextDecoration.Underline
+                ), start = 0, end = this.length
+            )
+        }
+
+        // Clickable text
+        Text(
+            text = annotatedString,
+            fontSize = 20.sp,
+            modifier = Modifier.clickable {
+                onNameClick("https://github.com/wreckitral")
+            }
+        )
+
         Text(text = "09021282227066", fontSize = 16.sp)
 
         Spacer(modifier = Modifier.height(30.dp))
